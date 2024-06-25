@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=67.0", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+"vectordb_bench.results" = ["*.json"]
+
+[project]
+name = "vectordb-bench"
+authors = [
+  {name="XuanYang-cn", email="xuan.yang@zilliz.com"},
+]
+description = "VectorDBBench is not just an offering of benchmark results for mainstream vector databases and cloud services, it's your go-to tool for the ultimate performance and cost-effectiveness comparison. Designed with ease-of-use in mind, VectorDBBench is devised to help users, even non-professionals, reproduce results or test new systems, making the hunt for the optimal choice amongst a plethora of cloud services and open-source vector databases a breeze."
+
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pytz",
+    "streamlit-autorefresh",
+    "streamlit>=1.23.0",
+    "streamlit_extras",
+    "tqdm",
+    "s3fs",
+    "psutil",
+    "polars",
+    "plotly",
+    "environs",
+    "pydantic<v2",
+    "scikit-learn",
+    "pymilvus", # with pandas, numpy, ujson
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+test = [
+    "ruff",
+    "pytest",
+]
+
+all = [
+    "grpcio==1.53.0", # for qdrant-client and pymilvus
+    "grpcio-tools==1.53.0", # for qdrant-client and pymilvus
+    "qdrant-client",
+    "pinecone-client",
+    "weaviate-client",
+    "elasticsearch",
+    "pgvector",
+    "sqlalchemy",
+    "redis",
+    "chromadb",
+    "psycopg2",
+]
+
+qdrant = [ "qdrant-client" ]
+pinecone = [ "pinecone-client" ]
+weaviate = [ "weaviate-client" ]
+elastic = [ "elasticsearch" ]
+pgvector = [ "pgvector", "sqlalchemy" ]
+pgvecto_rs = [ "psycopg2" ]
+redis = [ "redis" ]
+chromadb = [ "chromadb" ]
+
+[project.urls]
+"repository" = "https://github.com/zilliztech/VectorDBBench"
+
+[project.scripts]
+init_bench = "vectordb_bench.__main__:main"
+
+[tool.setuptools_scm]
