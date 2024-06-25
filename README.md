@@ -1,3 +1,23 @@
+# VDBBench
+
+We modify the original VectorDBBench code for experimenting SingleStore Database System comapring with Milvus and pgvector for our VLDB paper.
+
+We add several vector search experiments on SIFT10M/GIST1M dataset and add vector range search experiments on SIFT10M/GIST1M/COHERE10M dataset.
+
+For SingleStore running, we follow the commands below:
+```shell
+godist --aggregators 1 --leaves 1 -p 3306
+```
+
+For Milvus running, we use Milvus standalone server.
+
+We use the command below to start the frontend:
+```shell
+DROP_OLD=true NUM_PER_BATCH=100000 DATASET_LOCAL_DIR=/home/ubuntu/other2/jin467/datasets PYTHONPATH=$(readlink -f ~/memsql/notes/VectorDBBench) init_bench
+```
+
+
+
 # VectorDBBench: A Benchmark Tool for VectorDB
 
 [![version](https://img.shields.io/pypi/v/vectordb-bench.svg?color=blue)](https://pypi.org/project/vectordb-bench/)
