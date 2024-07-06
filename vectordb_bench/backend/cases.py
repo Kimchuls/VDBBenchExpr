@@ -46,7 +46,14 @@ class CaseType(Enum):
     Performance128D100M = 18
     Performance960D1M = 19
     Performance96D10M = 20
-    Performance128D1B = 21
+    
+    PerformanceRange128D10M = 21
+    PerformanceRange768D10M = 22
+    PerformanceRange960D1M = 23
+    PerformanceRange128D1M = 24
+    
+    DataInsertion128D1M = 25
+    DataInsertion128D10M = 26
     Custom = 100
 
     @property
@@ -71,6 +78,8 @@ class CaseType(Enum):
 class CaseLabel(Enum):
     Load = auto()
     Performance = auto()
+    RangeSearch = auto()
+    Insertion = auto()
 
 
 class Case(BaseModel):
@@ -119,6 +128,18 @@ class PerformanceCase(Case, BaseModel):
     filter_rate: float | None = None
     load_timeout: float | int = config.LOAD_TIMEOUT_DEFAULT
     optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_DEFAULT
+    
+class RangeCase(Case, BaseModel):
+    label: CaseLabel = CaseLabel.RangeSearch
+    filter_rate: float | None = None
+    load_timeout: float | int = config.LOAD_TIMEOUT_DEFAULT
+    optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_DEFAULT
+    
+class InsertCase(Case, BaseModel):
+    label: CaseLabel = CaseLabel.Insertion
+    filter_rate: float | None = None
+    load_timeout: float | int = config.LOAD_TIMEOUT_DEFAULT
+    optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_DEFAULT
 
 class CapacityDim960(CapacityCase):
     case_id: CaseType = CaseType.CapacityDim960
@@ -142,7 +163,16 @@ class Performance768D10M(PerformanceCase):
     name: str = "Search Performance Test (10M Dataset, 768 Dim)"
     description: str = """This case tests the search performance of a vector database with a large dataset (<b>Cohere 10M vectors</b>, 768 dimensions) at varying parallel levels.
 Results will show index building time, recall, and maximum QPS."""
-    load_timeout: float | int = config.LOAD_TIMEOUT_768D_10M * 10
+    load_timeout: float | int = config.LOAD_TIMEOUT_768D_10M
+    optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_10M
+    
+class PerformanceRange768D10M(RangeCase):
+    case_id: CaseType = CaseType.PerformanceRange768D10M
+    dataset: DatasetManager = Dataset.COHERE.manager(10_000_000)
+    name: str = "Range Search Performance Test (10M Dataset, 768 Dim)"
+    description: str = """This case tests the <b>range</b> search performance of a vector database with a large dataset (<b>Cohere 10M vectors</b>, 768 dimensions) at varying parallel levels.
+Results will show index building time, recall, and maximum QPS."""
+    load_timeout: float | int = config.LOAD_TIMEOUT_768D_10M
     optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_10M
 
 
@@ -163,6 +193,33 @@ class Performance128D1M(PerformanceCase):
 Results will show index building time, recall, and maximum QPS."""
     load_timeout: float | int = config.LOAD_TIMEOUT_768D_1M
     optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_1M
+    
+class PerformanceRange128D1M(RangeCase):
+    case_id: CaseType = CaseType.PerformanceRange128D1M
+    dataset: DatasetManager = Dataset.SIFT1M.manager(1_000_000)
+    name: str = "Range Search Performance Test (1M Dataset, 128 Dim)"
+    description: str = """This case tests the <b>range</b> search performance of a vector database with a large dataset (<b>SIFT 1M vectors</b>, 128 dimensions) at varying parallel levels.
+Results will show index building time, recall, and maximum QPS."""
+    load_timeout: float | int = config.LOAD_TIMEOUT_768D_1M * 1000
+    optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_1M
+
+class DataInsertion128D1M(InsertCase):
+    case_id: CaseType = CaseType.DataInsertion128D1M
+    dataset: DatasetManager = Dataset.SIFT1M.manager(1_000_000)
+    name: str = "InsertionTest (1M Dataset, 128 Dim)"
+    description: str = """This case tests the search performance of a vector database with a medium dataset (<b>SIFT 1M vectors</b>, 128 dimensions) when deleting and insertion data.
+Results will show index building time, recall, and maximum QPS."""
+    load_timeout: float | int = config.LOAD_TIMEOUT_768D_1M
+    optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_1M
+    
+class DataInsertion128D10M(InsertCase):
+    case_id: CaseType = CaseType.DataInsertion128D10M
+    dataset: DatasetManager = Dataset.SIFT1M.manager(10_000_000)
+    name: str = "Insertion Test (10M Dataset, 128 Dim)"
+    description: str = """This case tests the search performance of a vector database with a medium dataset (<b>SIFT 10M vectors</b>, 128 dimensions) when deleting and insertion data.
+Results will show index building time, recall, and maximum QPS."""
+    load_timeout: float | int = config.LOAD_TIMEOUT_768D_1M
+    optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_1M
 
 class Performance128D10M(PerformanceCase):
     case_id: CaseType = CaseType.Performance128D10M
@@ -170,7 +227,16 @@ class Performance128D10M(PerformanceCase):
     name: str = "Search Performance Test (10M Dataset, 128 Dim)"
     description: str = """This case tests the search performance of a vector database with a large dataset (<b>SIFT 10M vectors</b>, 128 dimensions) at varying parallel levels.
 Results will show index building time, recall, and maximum QPS."""
-    load_timeout: float | int = config.LOAD_TIMEOUT_768D_1M
+    load_timeout: float | int = config.LOAD_TIMEOUT_768D_1M * 1000
+    optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_1M
+    
+class PerformanceRange128D10M(RangeCase):
+    case_id: CaseType = CaseType.PerformanceRange128D10M
+    dataset: DatasetManager = Dataset.SIFT1M.manager(10_000_000)
+    name: str = "Range Search Performance Test (10M Dataset, 128 Dim)"
+    description: str = """This case tests the <b>range</b> search performance of a vector database with a large dataset (<b>SIFT 10M vectors</b>, 128 dimensions) at varying parallel levels.
+Results will show index building time, recall, and maximum QPS."""
+    load_timeout: float | int = config.LOAD_TIMEOUT_768D_1M * 1000
     optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_1M
 
 class Performance128D100M(PerformanceCase):
@@ -179,17 +245,8 @@ class Performance128D100M(PerformanceCase):
     name: str = "Search Performance Test (100M Dataset, 128 Dim)"
     description: str = """This case tests the search performance of a vector database with a large dataset (<b>SIFT 100M vectors</b>, 128 dimensions) at varying parallel levels.
 Results will show index building time, recall, and maximum QPS."""
-    load_timeout: float | int = config.LOAD_TIMEOUT_768D_1M
-    optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_1M * 100
-
-class Performance128D1B(PerformanceCase):
-    case_id: CaseType = CaseType.Performance128D1B
-    dataset: DatasetManager = Dataset.SIFT1M.manager(1_000_000_000)
-    name: str = "Search Performance Test (1B Dataset, 128 Dim)"
-    description: str = """This case tests the search performance of a vector database with a large dataset (<b>SIFT 1B vectors</b>, 128 dimensions) at varying parallel levels.
-Results will show index building time, recall, and maximum QPS."""
-    load_timeout: float | int = config.LOAD_TIMEOUT_768D_1M * 1000
-    optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_1M * 1000
+    load_timeout: float | int = config.LOAD_TIMEOUT_768D_10M
+    optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_10M
 
 class Performance960D1M(PerformanceCase):
     case_id: CaseType = CaseType.Performance960D1M
@@ -197,8 +254,17 @@ class Performance960D1M(PerformanceCase):
     name: str = "Search Performance Test (1M Dataset, 960 Dim)"
     description: str = """This case tests the search performance of a vector database with a large dataset (<b>GIST 1M vectors</b>, 960 dimensions) at varying parallel levels.
 Results will show index building time, recall, and maximum QPS."""
-    load_timeout: float | int = 10* config.LOAD_TIMEOUT_768D_1M
-    optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_1M
+    load_timeout: float | int = config.LOAD_TIMEOUT_768D_10M
+    optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_10M
+    
+class PerformanceRange960D1M(RangeCase):
+    case_id: CaseType = CaseType.PerformanceRange960D1M
+    dataset: DatasetManager = Dataset.GIST1M.manager(1_000_000)
+    name: str = "Range Search Performance Test (1M Dataset, 960 Dim)"
+    description: str = """This case tests the <b>range</b> search performance of a vector database with a large dataset (<b>GIST 1M vectors</b>, 960 dimensions) at varying parallel levels.
+Results will show index building time, recall, and maximum QPS."""
+    load_timeout: float | int = config.LOAD_TIMEOUT_768D_10M
+    optimize_timeout: float | int | None = config.OPTIMIZE_TIMEOUT_768D_10M
 
 class Performance96D10M(PerformanceCase):
     case_id: CaseType = CaseType.Performance96D10M
@@ -333,6 +399,7 @@ type2case = {
 
     CaseType.Performance768D100M: Performance768D100M,
     CaseType.Performance768D10M: Performance768D10M,
+    CaseType.PerformanceRange768D10M: PerformanceRange768D10M,
     CaseType.Performance768D1M: Performance768D1M,
 
     CaseType.Performance768D10M1P: Performance768D10M1P,
@@ -349,10 +416,14 @@ type2case = {
     CaseType.Performance1536D500K99P: Performance1536D500K99P,
     CaseType.Performance1536D5M99P: Performance1536D5M99P,
     CaseType.Performance128D1M: Performance128D1M,
+    CaseType.DataInsertion128D1M: DataInsertion128D1M,
+    CaseType.DataInsertion128D10M: DataInsertion128D10M,
+    CaseType.PerformanceRange128D1M: PerformanceRange128D1M,
     CaseType.Performance128D10M: Performance128D10M,
+    CaseType.PerformanceRange128D10M: PerformanceRange128D10M,
     CaseType.Performance128D100M: Performance128D100M,
-    CaseType.Performance128D1B: Performance128D1B,
     CaseType.Performance960D1M: Performance960D1M,
+    CaseType.PerformanceRange960D1M: PerformanceRange960D1M,
     CaseType.Performance96D10M: Performance96D10M,
     
 }

@@ -31,7 +31,7 @@ class Assembler:
         """group by case type, db, and case dataset"""
         runners = [cls.assemble(run_id, task) for task in tasks]
         load_runners = [r for r in runners if r.ca.label == CaseLabel.Load]
-        perf_runners = [r for r in runners if r.ca.label == CaseLabel.Performance]
+        perf_runners = [r for r in runners if r.ca.label == CaseLabel.Performance or r.ca.label == CaseLabel.RangeSearch or r.ca.label == CaseLabel.Insertion]
 
         # group by db
         db2runner = {}

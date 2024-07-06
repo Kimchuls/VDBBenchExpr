@@ -114,7 +114,6 @@ class PgVector2(VectorDB):
         index.drop(pg_engine, checkfirst = True)
         index.create(pg_engine)
 
-
     def _create_table(self, dim, pg_engine : int):
         try:
             # create table

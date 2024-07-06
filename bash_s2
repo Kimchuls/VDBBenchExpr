@@ -1,0 +1,22 @@
+@REM DROP_OLD=true NUM_PER_BATCH=100000 DATASET_LOCAL_DIR=/home/ubuntu/memsql/notes/VectorDBBench/datasets PYTHONPATH=$(readlink -f ~/memsql/notes/VectorDBBench) python ./run_custom.py --db singlestore --algo hnsw --dataset sift10m
+@REM DROP_OLD=false NUM_PER_BATCH=100000 DATASET_LOCAL_DIR=/home/ubuntu/memsql/notes/VectorDBBench/datasets PYTHONPATH=$(readlink -f ~/memsql/notes/VectorDBBench) python ./run_custom.py --db singlestore --algo hnsw --dataset sift10m
+
+
+@REM DROP_OLD=true NUM_PER_BATCH=100000 DATASET_LOCAL_DIR=/home/ubuntu/memsql/notes/VectorDBBench/datasets PYTHONPATH=$(readlink -f ~/memsql/notes/VectorDBBench) python ./run_custom.py --db singlestore --algo ivf --dataset sift10m
+@REM DROP_OLD=false NUM_PER_BATCH=100000 DATASET_LOCAL_DIR=/home/ubuntu/memsql/notes/VectorDBBench/datasets PYTHONPATH=$(readlink -f ~/memsql/notes/VectorDBBench) python ./run_custom.py --db singlestore --algo ivf --dataset sift10m
+
+
+@REM DROP_OLD=true NUM_PER_BATCH=100000 DATASET_LOCAL_DIR=/home/ubuntu/memsql/notes/VectorDBBench/datasets PYTHONPATH=$(readlink -f ~/memsql/notes/VectorDBBench) python ./run_custom.py --db singlestore --algo hnsw --dataset gist1m
+@REM DROP_OLD=false NUM_PER_BATCH=100000 DATASET_LOCAL_DIR=/home/ubuntu/memsql/notes/VectorDBBench/datasets PYTHONPATH=$(readlink -f ~/memsql/notes/VectorDBBench) python ./run_custom.py --db singlestore --algo hnsw --dataset gist1m
+
+
+@REM DROP_OLD=true NUM_PER_BATCH=100000 DATASET_LOCAL_DIR=/home/ubuntu/memsql/notes/VectorDBBench/datasets PYTHONPATH=$(readlink -f ~/memsql/notes/VectorDBBench) python ./run_custom.py --db singlestore --algo ivf --dataset gist1m
+@REM DROP_OLD=false NUM_PER_BATCH=100000 DATASET_LOCAL_DIR=/home/ubuntu/memsql/notes/VectorDBBench/datasets PYTHONPATH=$(readlink -f ~/memsql/notes/VectorDBBench) python ./run_custom.py --db singlestore --algo ivf --dataset gist1m
+
+
+DROP_OLD=true NUM_PER_BATCH=100000 DATASET_LOCAL_DIR=/home/ubuntu/memsql/notes/VectorDBBench/datasets PYTHONPATH=$(readlink -f ~/memsql/notes/VectorDBBench) python ./run_custom.py --db singlestore --algo hnsw --dataset cohere10m
+DROP_OLD=false NUM_PER_BATCH=100000 DATASET_LOCAL_DIR=/home/ubuntu/memsql/notes/VectorDBBench/datasets PYTHONPATH=$(readlink -f ~/memsql/notes/VectorDBBench) python ./run_custom.py --db singlestore --algo hnsw --dataset cohere10m
+
+
+DROP_OLD=true NUM_PER_BATCH=100000 DATASET_LOCAL_DIR=/home/ubuntu/memsql/notes/VectorDBBench/datasets PYTHONPATH=$(readlink -f ~/memsql/notes/VectorDBBench) python ./run_custom.py --db singlestore --algo ivf --dataset cohere10m
+DROP_OLD=false NUM_PER_BATCH=100000 DATASET_LOCAL_DIR=/home/ubuntu/memsql/notes/VectorDBBench/datasets PYTHONPATH=$(readlink -f ~/memsql/notes/VectorDBBench) python ./run_custom.py --db singlestore --algo ivf --dataset cohere10m

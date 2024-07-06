@@ -54,12 +54,9 @@ def isLowerIsBetterMetric(metric: str) -> bool:
 
 
 def calc_recall(count: int, ground_truth: list[int], got: list[int]) -> float:
-    # log.info(str(len(ground_truth)) + ","+str(len(got)))
-    # log.info(str(ground_truth[:100]))
-    # log.info(str(got[:100]))
     recalls = np.zeros(count)
     for i, result in enumerate(got):
         if result in ground_truth:
-            recalls[i] = 1
+            recalls[ground_truth.index(result)] = 1
 
     return np.mean(recalls)

@@ -106,7 +106,6 @@ class SIFT1M(BaseDataset):
         1_000_000: "MEDIUM",
         10_000_000: "LARGE",
         100_000_000: "EXTREME",
-        1_000_000_000: "XXL",
     }
 
 class DEEP1M(BaseDataset):
@@ -151,6 +150,7 @@ class DatasetManager(BaseModel):
     """
     data:   BaseDataset
     test_data: pd.DataFrame | None = None
+    distance_data: pd.DataFrame | None = None
     train_files : list[str] = []
 
     def __eq__(self, obj):
@@ -209,7 +209,7 @@ class DatasetManager(BaseModel):
         downloads = []
         if len(file_names) == 0:
             log.info("no local files, set all to downloading lists")
-            downloads = path2etag.keys()
+            # downloads = path2etag.keys()
         #else:
             # if local file exists, check the etag of local file with s3,
             # make sure data files aren't corrupted.
@@ -275,6 +275,7 @@ class DatasetManager(BaseModel):
          download files from url to self.data_dir, there'll be 4 types of files in the data_dir
              - train*.parquet: for training
              - test.parquet: for testing
+             - distance.parquet: for testing range search
              - neighbors.parquet: ground_truth of the test.parquet
              - neighbors_head_1p.parquet: ground_truth of the test.parquet after filtering 1% data
              - neighbors_99p.parquet: ground_truth of the test.parquet after filtering 99% data
@@ -286,6 +287,7 @@ class DatasetManager(BaseModel):
         self.train_files = sorted([f.name for f in self.data_dir.glob(f'{prefix}*.parquet')])
         log.debug(f"{self.data.name}: available train files {self.train_files}")
         self.test_data = self._read_file("test.parquet")
+        self.distance_data = self._read_file("distance.parquet")
         return True
 
     def get_ground_truth(self, filters: int | float | None = None) -> pd.DataFrame:

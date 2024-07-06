@@ -23,8 +23,7 @@ nprobes = [50,70,100,130]
 ks = [100, 200, 300, 500]
 ivf_configs = itertools.product(nprobes, ks)
 
-# efss = [100, 300, 400, 500, 600, 700, 800]
-efss = [200]
+efss = [100, 300, 400, 500, 600, 700, 800]
 hnsw_config = efss
 
 
@@ -73,8 +72,8 @@ def test_pgvector_ivf(dataset, nlist, nprobe):
         db=DB.PgVector,
         db_config=DB.PgVector.config_cls(
             user_name="zhan4404", password="zhan4404", url="localhost", db_name="pgvtest"),
-        db_case_config=DB.PgVector.case_config_cls(index_type=IndexType.IVFPQFS)(lists=nlist,
-                                                   probe=nprobe),
+        db_case_config=DB.PgVector.case_config_cls(index_type=IndexType.IVFPQFS)(nlist=nlist,
+                                                                                nprobe=nprobe),
         case_config=CaseConfig(case_id=dataset),
     )
 
@@ -166,6 +165,7 @@ def main():
     if args.algo == "ivf":
         if args.db == "pgvector":
             for nprobe in nprobes:
+                print(nprobe)
                 test_pgvector_ivf(dataset, nlist, nprobe)
         else:
             for nprobe, k in ivf_configs:
@@ -179,7 +179,6 @@ def main():
                     return
     elif args.algo == "hnsw":
         for efs in hnsw_config:
-            print(efs)
             if args.db == "singlestore":
                 test_s2_hnsw(dataset, efs, segments, rows)
             if args.db == "milvus":

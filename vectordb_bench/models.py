@@ -48,6 +48,8 @@ class CaseConfigParamType(Enum):
     quantizationType = "quantizationType"
     quantizationRatio = "quantizationRatio"
     reorderK = "reorder_k"
+    segments = "segments"
+    rows = "rows"
 
 
 
@@ -152,6 +154,7 @@ class TestResult(BaseModel):
                 task_config["db_config"] = db.config_cls(
                     **task_config["db_config"]
                 )
+                log.info(task_config["db_case_config"])
                 task_config["db_case_config"] = db.case_config_cls(
                     index_type=task_config["db_case_config"].get("index", None),
                 )(**task_config["db_case_config"])

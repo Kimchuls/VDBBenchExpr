@@ -3,6 +3,7 @@ from ..api import DBConfig, DBCaseConfig, MetricType, IndexType
 
 POSTGRE_URL_PLACEHOLDER = "postgresql://%s:%s@%s/%s"
 
+
 class SingleStoreConfig(DBConfig):
     # WIP - make it stop asking
     #
@@ -14,17 +15,20 @@ class SingleStoreConfig(DBConfig):
         return {
             # "user" : self.user.get_secret_value(),
             # "password" : self.password.get_secret_value(),
-            "user" : "root",
-            "password" : "",
+            "user": "root",
+            "password": "",
             # "host" : "svc-5ee568b2-281c-4097-ba5b-18dfd1fb0680-dml.aws-ohio-1.svc.singlestore.com",
             # "port" : 3306,
             # "user" : "admin",
             # "password" : "Purdueb3nchmark?",
-            "local_infile" : True
+            "local_infile": True
         }
+
 
 class SingleStoreIndexConfig(BaseModel, DBCaseConfig):
     metric_type: MetricType | None = None
+    segments: int | None = 12
+    rows: int | None = 10_000_000
 
     def parse_metric(self) -> str:
         if self.effective_metric() == MetricType.L2:
@@ -41,11 +45,15 @@ class SingleStoreIndexConfig(BaseModel, DBCaseConfig):
 
     def index_param(self) -> dict:
         return {
-            "metric_type" : self.parse_metric(),
+            "metric_type": self.parse_metric(),
+            "segments": self.segments,
+            "rows": self.rows,
         }
-    
+
     def search_param(self) -> dict:
-        return {}
+        return {
+                }
+
 
 class HNSWConfig(SingleStoreIndexConfig):
     index: IndexType = IndexType.HNSW
@@ -65,6 +73,7 @@ class HNSWConfig(SingleStoreIndexConfig):
             "ef": self.ef,
         }
 
+
 class IVFConfig(SingleStoreIndexConfig):
     nlist: int
     nprobe: int
@@ -72,13 +81,14 @@ class IVFConfig(SingleStoreIndexConfig):
     def index_param(self) -> dict:
         return super().index_param() | {
             "index_type": "IVF_FLAT",
-            "nlist" : self.nlist,
+            "nlist": self.nlist,
         }
 
     def search_param(self) -> dict:
         return super().search_param() | {
-            "nprobe" : self.nprobe,
+            "nprobe": self.nprobe,
         }
+
 
 class IVFPQConfig(IVFConfig):
     index: IndexType = IndexType.IVFPQ
@@ -93,8 +103,9 @@ class IVFPQConfig(IVFConfig):
 
     def search_param(self) -> dict:
         return super().search_param() | {
-            "k": self.reorder_k,
+            "kk": self.reorder_k,
         }
+
 
 class IVFPQFSConfig(IVFPQConfig):
     index: IndexType = IndexType.IVFPQFS
@@ -118,6 +129,7 @@ class IVFPQFSConfig(IVFPQConfig):
 
 #     def search_param(self) -> dict:
 #         return super().search_param()
+
 
 _singlestore_case_config = {
     IndexType.HNSW: HNSWConfig,

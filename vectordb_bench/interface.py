@@ -59,6 +59,8 @@ class BenchMarkRunner:
 
         self.receive_conn, send_conn = mp.Pipe()
         self.latest_error = ""
+        print(task_label)
+        print(tasks)
 
         try:
             self.running_task = Assembler.assemble_all(run_id, task_label, tasks)

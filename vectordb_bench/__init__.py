@@ -14,7 +14,7 @@ class config:
     DATASET_LOCAL_DIR = env.path("DATASET_LOCAL_DIR", "/tmp/vectordb_bench/dataset")
     NUM_PER_BATCH = env.int("NUM_PER_BATCH", 5000)
 
-    DROP_OLD = env.bool("DROP_OLD", True)
+    DROP_OLD = env.bool("DROP_OLD", False)
     print(DROP_OLD)
     USE_SHUFFLED_DATA = env.bool("USE_SHUFFLED_DATA", True)
 
@@ -31,8 +31,8 @@ class config:
 
     OPTIMIZE_TIMEOUT_DEFAULT    = 15 * 60   # 15min
     OPTIMIZE_TIMEOUT_768D_1M    =  15 * 60   # 15min
-    OPTIMIZE_TIMEOUT_768D_10M   = 2.5 * 3600 # 2.5h
-    OPTIMIZE_TIMEOUT_768D_100M  =  25 * 3600 # 1.04d
+    OPTIMIZE_TIMEOUT_768D_10M   = 10 * 3600 # 5h
+    OPTIMIZE_TIMEOUT_768D_100M  =  50 * 3600 # 1.04d
 
 
     OPTIMIZE_TIMEOUT_1536D_500K =  15 * 60   # 15min

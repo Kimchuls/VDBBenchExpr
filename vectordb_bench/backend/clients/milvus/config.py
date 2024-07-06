@@ -125,6 +125,7 @@ class SCANNConfig(IVFFlatConfig, DBCaseConfig):
             "metric_type": self.parse_metric(),
             "index_type": self.index.value,
             "params": {"nlist": self.nlist, "m_dim_divisor" : self.quantizationRatio, "use_elkan" : False},
+            # "params": {"nlist": self.nlist, "m_dim_divisor" : self.quantizationRatio, "use_elkan" : False, "_data": true},
         }
 
     def search_param(self) -> dict:

@@ -3,10 +3,13 @@ import psutil
 import traceback
 import concurrent
 import numpy as np
+import pandas as pd
+import time
 from enum import Enum, auto
+import random
 
 from . import utils
-from .cases import Case, CaseLabel
+from .cases import Case, CaseLabel, CaseType
 from ..base import BaseModel
 from ..models import TaskConfig, PerformanceTimeoutError
 
@@ -26,6 +29,28 @@ class RunningStatus(Enum):
     PENDING = auto()
     FINISHED = auto()
 
+def select_and_shuffle(M):
+    # Step 1: Generate a list of numbers from 1 to M
+    numbers = list(range(1, M + 1))
+    
+    # Step 2: Randomly select 60% of the numbers
+    selected_numbers_count = int(0.6 * M)
+    selected_numbers = random.sample(numbers, selected_numbers_count)
+    
+    # Step 3: Shuffle the selected numbers
+    random.shuffle(selected_numbers)
+    
+    # Step 4: Split the shuffled numbers into three sub-lists
+    sublist_1_size = selected_numbers_count // 4
+    sublist_2_size = selected_numbers_count // 4
+    sublist_3_size = selected_numbers_count - sublist_1_size - sublist_2_size
+    
+    sublist_1 = sorted(selected_numbers[:sublist_1_size])
+    sublist_2 = sorted(selected_numbers[sublist_1_size:sublist_1_size + sublist_2_size])
+    sublist_3 = sorted(selected_numbers[sublist_1_size + sublist_2_size:])
+    
+    # Step 5: Return the three sub-lists
+    return [sublist_1, sublist_2, sublist_3]
 
 class CaseRunner(BaseModel):
     """ DataSet, filter_rate, db_class with db config
@@ -95,8 +120,10 @@ class CaseRunner(BaseModel):
 
         if self.ca.label == CaseLabel.Load:
             return self._run_capacity_case()
-        elif self.ca.label == CaseLabel.Performance:
+        elif self.ca.label == CaseLabel.Performance or self.ca.label == CaseLabel.RangeSearch:
             return self._run_perf_case(drop_old)
+        elif self.ca.label == CaseLabel.Insertion:
+            return self._run_insert_case(drop_old)
         else:
             msg = f"unknown case type: {self.ca.label}"
             log.warning(msg)
@@ -147,6 +174,57 @@ class CaseRunner(BaseModel):
         else:
             log.info(f"Performance case got result: {m}")
             return m
+    
+    
+    def _run_insert_case(self, drop_old: bool = True) -> Metric:
+        total_number=1_000_000
+        if self.ca.case_id == CaseType.DataInsertion128D1M:
+            total_number = 1_000_000
+        elif self.ca.case_id == CaseType.DataInsertion128D10M:
+            total_number = 10_000_000
+        else:
+            log.info(f"Error Case Type")
+            return None
+        sublist = select_and_shuffle(total_number)
+        
+        try:
+            m = Metric()
+            if drop_old:
+                _, load_dur = self._load_train_data()
+                build_dur = self._optimize()
+                m.load_duration = round(load_dur+build_dur, 4)
+                log.info(
+                    f"Finish loading the entire dataset into VectorDB,"
+                    f" insert_duration={load_dur}, optimize_duration={build_dur}"
+                    f" load_duration(insert + optimize) = {m.load_duration}"
+                )
+
+            self._init_search_runner()
+            m.recall, m.serial_latency_p99 = self._serial_search()
+            m.qps = self._conc_search()
+            print(f"0% data replaced, recall: {m.recall}, latency: {m.serial_latency_p99}, qps: {m.qps}")
+            i=0
+            replaced_data=[]
+            labels = ["16M per partition", "32M per partition", "64M per partition"]
+            for i in range(len(labels)):
+                replaced_data+=sublist[i]
+                self.db.rows_check()
+                _, _ = self._replace_train_data(replaced_data)
+                    # time.sleep(5)
+                # self.db.rows_check()
+                # self._init_search_runner()
+                m.recall, m.serial_latency_p99 = self._serial_search()
+                # m.qps = self._conc_search()
+                print(f"{labels[i]}% data replaced, recall: {m.recall}, latency: {m.serial_latency_p99}, qps: {m.qps}")
+                self.db.rows_check()
+            
+        except Exception as e:
+            log.warning(f"Failed to run performance case, reason = {e}")
+            traceback.print_exc()
+            raise e from None
+        else:
+            log.info(f"Performance case got result: {m}")
+            return m
 
     @utils.time_it
     def _load_train_data(self):
@@ -154,6 +232,16 @@ class CaseRunner(BaseModel):
         try:
             runner = SerialInsertRunner(self.db, self.ca.dataset, self.normalize, self.ca.load_timeout)
             runner.run()
+        except Exception as e:
+            raise e from None
+        finally:
+            runner = None
+    
+    @utils.time_it
+    def _replace_train_data(self, replace_list):
+        try:
+            runner = SerialInsertRunner(self.db, self.ca.dataset, self.normalize, self.ca.load_timeout, replace_list)
+            runner.replace()
         except Exception as e:
             raise e from None
         finally:
@@ -208,7 +296,15 @@ class CaseRunner(BaseModel):
                 raise e from None
 
     def _init_search_runner(self):
+        # print(self.ca.dataset.test_data.head())
         test_emb = np.stack(self.ca.dataset.test_data["emb"])
+        # exit(0)
+        df = self.ca.dataset.distance_data
+        if (self.ca.label != CaseLabel.RangeSearch) or (not isinstance(df, pd.DataFrame) and self.ca.dataset.distance_data.is_empty()) or (isinstance(df, pd.DataFrame) and self.ca.dataset.distance_data.empty):
+            distance_data = []
+        else:
+            distance_data = np.stack(self.ca.dataset.distance_data["distance"]).tolist()
+        
         if self.normalize:
             test_emb = test_emb / np.linalg.norm(test_emb, axis=1)[:, np.newaxis]
         self.test_emb = test_emb.tolist()
@@ -220,12 +316,14 @@ class CaseRunner(BaseModel):
             test_data=self.test_emb,
             ground_truth=gt_df,
             filters=self.ca.filters,
+            distance_data = distance_data,
         )
 
         self.search_runner =  MultiProcessingSearchRunner(
             db=self.db,
             test_data=self.test_emb,
             filters=self.ca.filters,
+            distance_data = distance_data,
         )
 
     def stop(self):

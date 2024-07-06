@@ -1,7 +1,7 @@
 from pydantic import BaseModel, SecretStr
 from ..api import DBConfig, DBCaseConfig, MetricType, IndexType
 
-POSTGRE_URL_PLACEHOLDER = "postgresql://%s:%s@%s:5433/%s"
+POSTGRE_URL_PLACEHOLDER = "postgresql://%s:%s@%s/%s"
 
 class PgVectorConfig(DBConfig):
     user_name: SecretStr = "zhan4404"
@@ -47,7 +47,7 @@ class PgVectorIndexConfig(BaseModel, DBCaseConfig):
             "probes" : self.probes,
             "metric_fun" : self.parse_metric_fun_str()
         }
-
+    
 _pgvector_case_config = {
     IndexType.IVFPQFS: PgVectorIndexConfig,
 }

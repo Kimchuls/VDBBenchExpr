@@ -26,6 +26,7 @@ class MultiProcessingSearchRunner:
         test_data: list[list[float]],
         k: int = 100,
         filters: dict | None = None,
+        distance_data: list[float] | None = None,
         # concurrencies: Iterable[int] = (1, 2, 4, 12, 24),
         concurrencies: Iterable[int] = (16,),
         duration: int = 30,
@@ -37,6 +38,7 @@ class MultiProcessingSearchRunner:
         self.duration = duration
 
         self.test_data = test_data
+        self.distance_data = distance_data
         log.debug(f"test dataset columns: {len(test_data)}")
 
     def search(self, test_data: list[list[float]], q: mp.Queue, cond: mp.Condition) -> tuple[int, float]:
@@ -52,11 +54,13 @@ class MultiProcessingSearchRunner:
             count = 0
             while time.perf_counter() < start_time + self.duration:
                 s = time.perf_counter()
+                distance  = [] if self.distance_data == [] else [self.distance_data[idx]]
                 try:
                     self.db.search_embedding(
                         test_data[idx],
                         self.k,
                         self.filters,
+                        distance,
                     )
                 except Exception as e:
                     log.warning(f"VectorDB search_embedding error: {e}")

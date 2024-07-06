@@ -12,3 +12,6 @@ venv/
 # datasets/
 vectordb_bench/results*
 .git
+screenlog*
+run*
+bash*

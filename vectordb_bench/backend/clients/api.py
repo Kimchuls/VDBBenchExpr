@@ -5,6 +5,9 @@ from contextlib import contextmanager
 
 from pydantic import BaseModel, validator, SecretStr
 
+class SearchType(str, Enum):
+    SIMPLE = "SIMPLE"
+    RANGE = "RANGE"
 
 class MetricType(str, Enum):
     L2 = "L2"
@@ -142,6 +145,30 @@ class VectorDB(ABC):
             int: inserted data count
         """
         raise NotImplementedError
+    
+    @abstractmethod
+    def delete_embeddings(
+        self,
+        # embeddings: list[list[float]],
+        metadata: list[int],
+        **kwargs,
+    ) -> (int, Exception):
+        """Insert the embeddings to the vector database. The default number of embeddings for
+        each insert_embeddings is 5000.
+
+        Args:
+            embeddings(list[list[float]]): list of embedding to add to the vector database.
+            metadatas(list[int]): metadata associated with the embeddings, for filtering.
+            **kwargs(Any): vector database specific parameters.
+
+        Returns:
+            int: inserted data count
+        """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def rows_check(self):
+        raise NotImplementedError
 
     @abstractmethod
     def search_embedding(
@@ -149,6 +176,7 @@ class VectorDB(ABC):
         query: list[float],
         k: int = 100,
         filters: dict | None = None,
+        distance_data: float | None = None,
     ) -> list[int]:
         """Get k most similar embeddings to query vector.
 
